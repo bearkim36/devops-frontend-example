@@ -1,0 +1,48 @@
+name: Front-end CI
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:    
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [ 14.x]
+
+    steps:
+      # source checkout
+      - uses: actions/checkout@v2
+
+      # nodejs 설치
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      
+      # module 설치
+      - name: npm install
+        run: npm install
+
+      # 소스 빌드
+      - name: Npm run build
+        run: npm run build
+
+      # scp 파일 복사
+      # ${{secret.키 이름}} 은 github repository 시크릿 키이다. 
+      # 구글링 해도 쉽게 나오지만 간단하게 설명하면 
+      # github repository 상단메뉴 > settings > secrets 에 new respositry secret 버튼으로 
+      # 노출하기 싫은 환경변수를 저장할 수 있다.
+
+      # 아래 스크립트는 build에 있는 파일을 배포서버의 웹서버 루트에 복사해 넣는 액션이다.
+      - name: executing remote ssh commands using ssh key
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          source: "build"
+          target: "/var/www/html"
