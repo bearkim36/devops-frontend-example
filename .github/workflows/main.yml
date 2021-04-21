@@ -45,4 +45,4 @@ jobs:
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
           source: "build"
-          target: "/var/www/html"
+          target: "devops_test"
